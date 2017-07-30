@@ -26,7 +26,8 @@ RUN rpm --rebuilddb \
 		sudo \
 		vim-minimal \
 		yum-plugin-versionlock \
-		xz
+		xz \
+		which
 
 # -----------------------------------------------------------------------------
 # Update packages
