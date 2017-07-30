@@ -1,10 +1,10 @@
 # =============================================================================
-# jdeathe/centos-ssh
+# sugarfactory/centos7-ssh-puppet
 #
-# CentOS-7 7.3.1611 x86_64 - SCL/EPEL/IUS Repos. / Supervisor / OpenSSH.
+# CentOS-7 7.x x86_64 - EPEL Repos. / Supervisor / OpenSSH.
 # 
 # =============================================================================
-FROM centos:7.3.1611
+FROM centos:7
 
 # -----------------------------------------------------------------------------
 # Base Install + Import the RPM GPG keys for Repositories
@@ -14,39 +14,48 @@ RUN rpm --rebuilddb \
 		http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
 	&& rpm --import \
 		https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7 \
-	&& rpm --import \
-		https://dl.iuscommunity.org/pub/ius/IUS-COMMUNITY-GPG-KEY \
 	&& yum -y install \
 			--setopt=tsflags=nodocs \
 			--disableplugin=fastestmirror \
-		centos-release-scl \
-		centos-release-scl-rh \
 		epel-release \
-		https://centos7.iuscommunity.org/ius-release.rpm \
-		openssh-6.6.1p1-35.el7_3 \
-		openssh-server-6.6.1p1-35.el7_3 \
-		openssh-clients-6.6.1p1-35.el7_3 \
-		openssl-1.0.1e-60.el7 \
-		python-setuptools-0.9.8-4.el7 \
-		sudo-1.8.6p7-21.el7_3 \
-		vim-minimal-7.4.160-1.el7_3.1 \
-		yum-plugin-versionlock-1.1.31-40.el7 \
-		xz-5.2.2-1.el7 \
-	&& yum versionlock add \
 		openssh \
 		openssh-server \
 		openssh-clients \
+		openssl \
 		python-setuptools \
 		sudo \
 		vim-minimal \
 		yum-plugin-versionlock \
-		xz \
-	&& yum clean all \
-	&& rm -rf /etc/ld.so.cache \
-	&& rm -rf /sbin/sln \
-	&& rm -rf /usr/{{lib,share}/locale,share/{man,doc,info,cracklib,i18n},{lib,lib64}/gconv,bin/localedef,sbin/build-locale-archive} \
-	&& rm -rf /{root,tmp,var/cache/{ldconfig,yum}}/* \
-	&& > /etc/sysconfig/i18n
+		xz
+
+# -----------------------------------------------------------------------------
+# Update packages
+# -----------------------------------------------------------------------------
+RUN yum update -y
+
+# -----------------------------------------------------------------------------
+# copy bootsrap script
+# install rvm, ruby and puppet gems
+# fix puppet
+# -----------------------------------------------------------------------------
+RUN mkdir /root/scripts
+
+ADD scripts/bootstrap_puppet_with_r10k_only_ruby2.3.sh \
+    /root/scripts/bootstrap_puppet_with_r10k_only_ruby2.3.sh
+
+RUN bash /root/scripts/bootstrap_puppet_with_r10k_only_ruby2.3.sh
+
+RUN bash -c 'source /etc/bashrc; gem environment |egrep "install|update"'
+
+RUN bash -c 'source /etc/bashrc; puppet module list'
+
+# -----------------------------------------------------------------------------
+# purge yum and rpm unused files
+# -----------------------------------------------------------------------------
+
+RUN rm -rf /var/cache/yum/* \
+    && yum clean all \
+    && rm -rf /usr/local/rvm/src/ruby-2.3.4/*
 
 # -----------------------------------------------------------------------------
 # Install supervisord (required to run more than a single process in a container)
@@ -64,7 +73,7 @@ RUN easy_install \
 # UTC Timezone & Networking
 # -----------------------------------------------------------------------------
 RUN ln -sf \
-		/usr/share/zoneinfo/UTC \
+		/usr/share/zoneinfo/Europe/Prague \
 		/etc/localtime \
 	&& echo "NETWORKING=yes" > /etc/sysconfig/network
 

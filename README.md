@@ -1,22 +1,16 @@
-centos-ssh
+centos7-ssh-puppet
 ==========
 
-Docker Images of CentOS-6 6.9 x86_64 / CentOS-7 7.3.1611 x86_64
+Docker Images of CentOS-7 7.x x86_64
 
-Includes public key authentication, Automated password generation and supports custom configuration via environment variables.
-
-## Overview & links
-
-The latest CentOS-6 / CentOS-7 based releases can be pulled from the `centos-6` / `centos-7` Docker tags respectively. For production use it is recommended to select a specific release tag - the convention is `centos-6-1.8.1` OR `1.8.1` for the [1.8.1](https://github.com/jdeathe/centos-ssh/tree/1.8.1) release tag and `centos-7-2.2.3` OR `2.2.3` for the [2.2.3](https://github.com/jdeathe/centos-ssh/tree/2.2.3) release tag.
+Includes SSH server, RVM, ruby 2.3, puppet
+SSH server includes public key authentication, Automated password generation and supports custom configuration via environment variables.
 
 ### Tags and respective `Dockerfile` links
 
-- `centos-7`,`centos-7-2.2.3`,`2.2.3` [(centos-7/Dockerfile)](https://github.com/jdeathe/centos-ssh/blob/centos-7/Dockerfile)
-- `centos-6`,`centos-6-1.8.1`,`1.8.1` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh/blob/centos-6/Dockerfile)
-
 The Dockerfile can be used to build a base image that is the bases for several other docker images.
 
-Included in the build are the [SCL](https://www.softwarecollections.org/), [EPEL](http://fedoraproject.org/wiki/EPEL) and [IUS](https://ius.io) repositories. Installed packages include [OpenSSH](http://www.openssh.com/portable.html) secure shell, [Sudo](http://www.courtesan.com/sudo/) and [vim-minimal](http://www.vim.org/) are along with python-setuptools, [supervisor](http://supervisord.org/) and [supervisor-stdout](https://github.com/coderanger/supervisor-stdout).
+Included in the build are the [EPEL](http://fedoraproject.org/wiki/EPEL). Installed packages include [OpenSSH](http://www.openssh.com/portable.html) secure shell, [Sudo](http://www.courtesan.com/sudo/) and [vim-minimal](http://www.vim.org/) are along with python-setuptools, [supervisor](http://supervisord.org/) and [supervisor-stdout](https://github.com/coderanger/supervisor-stdout).
 
 [Supervisor](http://supervisord.org/) is used to start and the sshd daemon when a docker container based on this image is run. To enable simple viewing of stdout for the sshd subprocess, supervisor-stdout is included. This allows you to see output from the supervisord controlled subprocesses with `docker logs {container-name}`.
 
@@ -30,19 +24,19 @@ SSH is not required in order to access a terminal for the running container. The
 $ docker exec -it {container-name-or-id} bash
 ```
 
-For cases where access to docker exec is not possible the preferred method is to use Command Keys and the nsenter command. See [command-keys.md](https://github.com/jdeathe/centos-ssh/blob/centos-7/command-keys.md) for details on how to set this up.
+For cases where access to docker exec is not possible the preferred method is to use Command Keys and the nsenter command. See [command-keys.md](https://github.com/sugarfactory/centos6-ssh-puppet/blob/master/command-keys.md) for details on how to set this up.
 
 ## Quick Example
 
 ### SSH Mode
 
-Run up an SSH container named 'ssh.pool-1.1.1' from the docker image 'jdeathe/centos-ssh' on port 2020 of your docker host.
+Run up an SSH container named 'ssh.pool-1.1.1' from the docker image 'sugarfactory/centos6-ssh-puppet' on port 2020 of your docker host.
 
 ```
 $ docker run -d \
   --name ssh.pool-1.1.1 \
   -p 2020:22 \
-  jdeathe/centos-ssh:centos-7
+  sugarfactory/centos7-ssh-puppet
 ```
 
 Check the logs for the password (required for sudo).
@@ -69,14 +63,14 @@ $ ssh -p 2020 -i id_rsa_insecure \
 
 ### SFTP Mode
 
-Run up an SFTP container named 'sftp.pool-1.1.1' from the docker image 'jdeathe/centos-ssh' on port 2021 of your docker host.
+Run up an SFTP container named 'sftp.pool-1.1.1' from the docker image 'sugarfactory/centos7-ssh-puppet' on port 2021 of your docker host.
 
 ```
 $ docker run -d \
   --name sftp.pool-1.1.1 \
   -p 2021:22 \
   -e SSH_USER_FORCE_SFTP=true \
-  jdeathe/centos-ssh:centos-7
+  sugarfactory/centos7-ssh-puppet
 ```
 
 Connect using the `sftp` command line client with the [insecure private key](https://github.com/mitchellh/vagrant/blob/master/keys/vagrant).
@@ -92,145 +86,7 @@ $ sftp -i id_rsa_insecure \
 
 ### Running
 
-To run the a docker container from this image you can use the standard docker commands. Alternatively, you can use the embedded (Service Container Manager Interface) [scmi](https://github.com/jdeathe/centos-ssh/blob/centos-7/src/usr/sbin/scmi) that is included in the image since `1.7.2` / `2.1.2` or, if you have a checkout of the [source repository](https://github.com/jdeathe/centos-ssh), and have make installed the Makefile provides targets to build, install, start, stop etc. where environment variables can be used to configure the container options and set custom docker run parameters.
-
-#### SCMI Installation Examples
-
-The following example uses docker to run the SCMI install command to create and start a container named `ssh.pool-1.1.1`. To use SCMI it requires the use of the `--privileged` docker run parameter and the docker host's root directory mounted as a volume with the container's mount directory also being set in the `scmi` `--chroot` option. The `--setopt` option is used to add extra parameters to the default docker run command template; in the following example a named configuration volume is added which allows the SSH host keys to persist after the first container initialisation. Not that the placeholder `{{NAME}}` can be used in this option and is replaced with the container's name.
-
-##### SCMI Install
-
-```
-$ docker run \
-  --rm \
-  --privileged \
-  --volume /:/media/root \
-  jdeathe/centos-ssh:2.2.3 \
-  /usr/sbin/scmi install \
-    --chroot=/media/root \
-    --tag=2.2.3 \
-    --name=ssh.pool-1.1.1 \
-    --setopt="--volume {{NAME}}.config-ssh:/etc/ssh"
-```
-
-##### SCMI Uninstall
-
-To uninstall the previous example simply run the same docker run command with the scmi `uninstall` command.
-
-```
-$ docker run \
-  --rm \
-  --privileged \
-  --volume /:/media/root \
-  jdeathe/centos-ssh:2.2.3 \
-  /usr/sbin/scmi uninstall \
-    --chroot=/media/root \
-    --tag=2.2.3 \
-    --name=ssh.pool-1.1.1 \
-    --setopt="--volume {{NAME}}.config-ssh:/etc/ssh"
-```
-
-##### SCMI Systemd Support
-
-If your docker host has systemd (and optionally etcd) installed then `scmi` provides a method to install the container as a systemd service unit. This provides some additional features for managing a group of instances on a single docker host and has the option to use an etcd backed service registry. Using a systemd unit file allows the System Administrator to use a Drop-In to override the settings of a unit-file template used to create service instances. To use the systemd method of installation use the `-m` or `--manager` option of `scmi` and to include the optional etcd register companion unit use the `--register` option.
-
-```
-$ docker run \
-  --rm \
-  --privileged \
-  --volume /:/media/root \
-  jdeathe/centos-ssh:2.2.3 \
-  /usr/sbin/scmi install \
-    --chroot=/media/root \
-    --tag=2.2.3 \
-    --name=ssh.pool-1.1.1 \
-    --manager=systemd \
-    --register \
-    --env='SSH_SUDO="ALL=(ALL) NOPASSWD:ALL"' \
-    --env='SSH_USER="centos"' \
-    --setopt='--volume {{NAME}}.config-ssh:/etc/ssh'
-```
-
-##### SCMI Fleet Support
-
-If your docker host has systemd, fleetd (and optionally etcd) installed then `scmi` provides a method to schedule the container  to run on the cluster. This provides some additional features for managing a group of instances on a [fleet](https://github.com/coreos/fleet) cluster and has the option to use an etcd backed service registry. To use the fleet method of installation use the `-m` or `--manager` option of `scmi` and to include the optional etcd register companion unit use the `--register` option.
-
-##### SCMI Image Information
-
-Since release tags `1.7.2` / `2.1.2` the install template has been added to the image metadata. Using docker inspect you can access `scmi` to simplify install/uninstall tasks.
-
-_NOTE:_ A prerequisite of the following examples is that the image has been pulled (or loaded from the release package).
-
-```
-$ docker pull jdeathe/centos-ssh:2.2.3
-```
-
-To see detailed information about the image run `scmi` with the `--info` option. To see all available `scmi` options run with the `--help` option.
-
-```
-$ eval "sudo -E $(
-    docker inspect \
-    -f "{{.ContainerConfig.Labels.install}}" \
-    jdeathe/centos-ssh:2.2.3
-  ) --info"
-```
-
-To perform an installation using the docker name `ssh.pool-1.2.1` simply use the `--name` or `-n` option.
-
-```
-$ eval "sudo -E $(
-    docker inspect \
-    -f "{{.ContainerConfig.Labels.install}}" \
-    jdeathe/centos-ssh:2.2.3
-  ) --name=ssh.pool-1.2.1"
-```
-
-To uninstall use the *same command* that was used to install but with the `uninstall` Label.
-
-```
-$ eval "sudo -E $(
-    docker inspect \
-    -f "{{.ContainerConfig.Labels.uninstall}}" \
-    jdeathe/centos-ssh:2.2.3
-  ) --name=ssh.pool-1.2.1"
-```
-
-##### SCMI on Atomic Host
-
-With the addition of install/uninstall image labels it is possible to use [Project Atomic's](http://www.projectatomic.io/) `atomic install` command to simplify install/uninstall tasks on [CentOS Atomic](https://wiki.centos.org/SpecialInterestGroup/Atomic) Hosts.
-
-To see detailed information about the image run `scmi` with the `--info` option. To see all available `scmi` options run with the `--help` option.
-
-```
-$ sudo -E atomic install \
-  -n ssh.pool-1.3.1 \
-  jdeathe/centos-ssh:2.2.3 \
-  --info
-```
-
-To perform an installation using the docker name `ssh.pool-1.3.1` simply use the `-n` option of the `atomic install` command.
-
-```
-$ sudo -E atomic install \
-  -n ssh.pool-1.3.1 \
-  jdeathe/centos-ssh:2.2.3
-```
-
-Alternatively, you could use the `scmi` options `--name` or `-n` for naming the container.
-
-```
-$ sudo -E atomic install \
-  jdeathe/centos-ssh:2.2.3 \
-  --name ssh.pool-1.3.1
-```
-
-To uninstall use the *same command* that was used to install but with the `uninstall` Label.
-
-```
-$ sudo -E atomic uninstall \
-  -n ssh.pool-1.3.1 \
-  jdeathe/centos-ssh:2.2.3
-```
+To run the a docker container from this image you can use the standard docker commands.
 
 #### Using environment variables
 
@@ -245,7 +101,7 @@ $ docker stop ssh.pool-1.1.1 \
   --name ssh.pool-1.1.1 \
   -p :22 \
   --env "SSH_USER=app-user" \
-  jdeathe/centos-ssh:centos-7
+  sugarfactory/centos7-ssh-puppet
 ```
 
 Now you can find out the app-admin, (sudoer), user's password by inspecting the container's logs
@@ -415,7 +271,7 @@ If setting a password for the SSH user you might not want to store the plain tex
 To generate a hashed password string for the password `Passw0rd!`, use the following method.
 
 ```
-$ docker run --rm jdeathe/centos-ssh \
+$ docker run --rm sugarfactory/centos7-ssh-puppet \
   env PASSWORD=Passw0rd! \
   python -c "import crypt,os; print crypt.crypt(os.environ.get('PASSWORD'))"
 ```

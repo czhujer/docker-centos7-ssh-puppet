@@ -1,8 +1,8 @@
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
-DOCKER_USER := jdeathe
-DOCKER_IMAGE_NAME := centos-ssh
+DOCKER_USER := sugarfactory
+DOCKER_IMAGE_NAME := centos7-ssh-puppet
 SHPEC_ROOT := test/shpec
 
 # Tag validation patterns
