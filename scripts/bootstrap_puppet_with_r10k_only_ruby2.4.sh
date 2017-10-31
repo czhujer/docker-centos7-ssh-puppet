@@ -7,6 +7,9 @@ else
     sudo="sudo";
 fi;
 
+# install deps pkgs
+$sudo yum install which -y
+
 # Update our packages...
 if which yum &>/dev/null; then
   $sudo yum update -y -q
@@ -41,12 +44,14 @@ $sudo curl -L https://get.rvm.io | bash -s stable
 # Source rvm.sh so we have access to RVM in this shell
 $sudo source /etc/profile.d/rvm.sh
 
-# Install Ruby 1.8.7
-#$sudo rvm install ruby-1.9
-#$sudo rvm alias create default 1.9
+# update rvm 
+$sudo rvm get stable && $sudo rvm cleanup all
 
-$sudo rvm install ruby-2.4.1
-$sudo rvm alias create default ruby-2.4.1
+$sudo source /etc/profile.d/rvm.sh
+
+# Install Ruby
+$sudo rvm install ruby-2.4.2
+$sudo rvm alias create default ruby-2.4.2
 
 $sudo source /etc/profile.d/rvm.sh
 
@@ -54,43 +59,51 @@ if [[ `$sudo rpm -qa \*-release | grep -Ei "oracle|redhat|centos|openvz" | cut -
   echo "CentOS/openvz 7.x detected..."; 
 
   # Update rubygems, and pull down facter and then puppet...
-  $sudo rvm 2.4.1 do gem update --system
-  $sudo rvm 2.4.1 do gem install json_pure --no-ri --no-rdoc
-  $sudo rvm 2.4.1 do gem install facter --no-ri --no-rdoc
-  $sudo rvm 2.4.1 do gem install puppet --no-ri --no-rdoc -v4.3.2
-  $sudo rvm 2.4.1 do gem install libshadow --no-ri --no-rdoc
-  $sudo rvm 2.4.1 do gem install puppet-module --no-ri --no-rdoc
-  $sudo rvm 2.4.1 do gem install ruby-augeas --no-ri --no-rdoc
-  $sudo rvm 2.4.1 do gem install syck --no-ri --no-rdoc
+  $sudo rvm 2.4.2 do gem update --system
+  $sudo rvm 2.4.2 do gem install json_pure --no-ri --no-rdoc
+  $sudo rvm 2.4.2 do gem install facter --no-ri --no-rdoc
+  $sudo rvm 2.4.2 do gem install puppet --no-ri --no-rdoc -v4.10.8
+  $sudo rvm 2.4.2 do gem install libshadow --no-ri --no-rdoc
+  $sudo rvm 2.4.2 do gem install puppet-module --no-ri --no-rdoc
+  $sudo rvm 2.4.2 do gem install ruby-augeas --no-ri --no-rdoc
+  $sudo rvm 2.4.2 do gem install syck --no-ri --no-rdoc
 
   # install r10k
-  $sudo rvm 2.4.1 do gem install --no-rdoc --no-ri r10k
+  $sudo rvm 2.4.2 do gem install --no-rdoc --no-ri r10k
 
   if [ ! -L /etc/puppetlabs/code/modules ]; then
     rm -rf /etc/puppetlabs/code/modules;
+    mkdir -p /etc/puppetlabs/code;
     ln -s /etc/puppet/modules/ /etc/puppetlabs/code/modules
   fi;
+
+  #fix hiera
+  #mkdir /etc/puppetlabs/puppet && cd /etc/puppetlabs/puppet && ln -s /etc/puppet/hiera.yaml ./
 
 else
   echo "CentOS/openvz 6.x detected..."; 
 
   # Update rubygems, and pull down facter and then puppet...
-  $sudo rvm 2.4.1 do gem update --system
-  $sudo rvm 2.4.1 do gem install json_pure -v1.8.3 --no-ri --no-rdoc
-  $sudo rvm 2.4.1 do gem install facter --no-ri --no-rdoc
-  $sudo rvm 2.4.1 do gem install puppet --no-ri --no-rdoc -v3.8.7
-  $sudo rvm 2.4.1 do gem install libshadow --no-ri --no-rdoc
-  $sudo rvm 2.4.1 do gem install puppet-module --no-ri --no-rdoc
-  $sudo rvm 2.4.1 do gem install ruby-augeas --no-ri --no-rdoc
-  $sudo rvm 2.4.1 do gem install syck --no-ri --no-rdoc
+  $sudo rvm 2.4.2 do gem update --system
+  $sudo rvm 2.4.2 do gem install json_pure -v1.8.3 --no-ri --no-rdoc
+  $sudo rvm 2.4.2 do gem install facter --no-ri --no-rdoc
+  $sudo rvm 2.4.2 do gem install puppet --no-ri --no-rdoc -v3.8.7
+  $sudo rvm 2.4.2 do gem install libshadow --no-ri --no-rdoc
+  $sudo rvm 2.4.2 do gem install puppet-module --no-ri --no-rdoc
+  $sudo rvm 2.4.2 do gem install ruby-augeas --no-ri --no-rdoc
+  $sudo rvm 2.4.2 do gem install syck --no-ri --no-rdoc
 
   # install r10k
-  $sudo rvm 2.4.1 do gem install --no-rdoc --no-ri r10k
+  $sudo rvm 2.4.2 do gem install --no-rdoc --no-ri r10k
 
   #fix puppet
-  $sudo sed -e 's/  Syck.module_eval monkeypatch/  #Syck.module_eval monkeypatch/' -i /usr/local/rvm/gems/ruby-2.4.1/gems/puppet-3.8.7/lib/puppet/vendor/safe_yaml/lib/safe_yaml/syck_node_monkeypatch.rb
+  $sudo sed -e 's/  Syck.module_eval monkeypatch/  #Syck.module_eval monkeypatch/' -i /usr/local/rvm/gems/ruby-2.4.2/gems/puppet-3.8.7/lib/puppet/vendor/safe_yaml/lib/safe_yaml/syck_node_monkeypatch.rb
 
 fi;
+
+#remove old versions
+$sudo rvm uninstall 2.4.1
+$sudo rvm uninstall 2.4.0
 
 # Create necessary Puppet directories...
 $sudo mkdir -p /etc/puppet /var/lib /var/log /var/run /etc/puppet/manifests /etc/puppet/modules /etc/puppet/hieradata
