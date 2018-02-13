@@ -56,7 +56,7 @@ RUN bash -c 'source /etc/bashrc; puppet module list'
 
 RUN rm -rf /var/cache/yum/* \
     && yum clean all \
-    && rm -rf /usr/local/rvm/src/ruby-2.4.2/*
+    && rm -rf /usr/local/rvm/src/ruby-2.4.3/*
 
 # -----------------------------------------------------------------------------
 # Install supervisord (required to run more than a single process in a container)
@@ -65,7 +65,7 @@ RUN rm -rf /var/cache/yum/* \
 # supervisord to be easily inspected with "docker logs".
 # -----------------------------------------------------------------------------
 RUN easy_install \
-		'supervisor == 3.3.2' \
+		'supervisor == 3.3.3' \
 		'supervisor-stdout == 0.1.1' \
 	&& mkdir -p \
 		/var/log/supervisor/

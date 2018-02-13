@@ -50,8 +50,8 @@ $sudo rvm get stable && $sudo rvm cleanup all
 $sudo source /etc/profile.d/rvm.sh
 
 # Install Ruby
-$sudo rvm install ruby-2.4.2
-$sudo rvm alias create default ruby-2.4.2
+$sudo rvm install ruby-2.4.3
+$sudo rvm alias create default ruby-2.4.3
 
 $sudo source /etc/profile.d/rvm.sh
 
@@ -59,17 +59,17 @@ if [[ `$sudo rpm -qa \*-release | grep -Ei "oracle|redhat|centos|openvz" | cut -
   echo "CentOS/openvz 7.x detected..."; 
 
   # Update rubygems, and pull down facter and then puppet...
-  $sudo rvm 2.4.2 do gem update --system
-  $sudo rvm 2.4.2 do gem install json_pure --no-ri --no-rdoc
-  $sudo rvm 2.4.2 do gem install facter --no-ri --no-rdoc
-  $sudo rvm 2.4.2 do gem install puppet --no-ri --no-rdoc -v4.10.8
-  $sudo rvm 2.4.2 do gem install libshadow --no-ri --no-rdoc
-  $sudo rvm 2.4.2 do gem install puppet-module --no-ri --no-rdoc
-  $sudo rvm 2.4.2 do gem install ruby-augeas --no-ri --no-rdoc
-  $sudo rvm 2.4.2 do gem install syck --no-ri --no-rdoc
+  $sudo rvm 2.4.3 do gem update --system
+  $sudo rvm 2.4.3 do gem install json_pure --no-ri --no-rdoc
+  $sudo rvm 2.4.3 do gem install facter --no-ri --no-rdoc
+  $sudo rvm 2.4.3 do gem install puppet --no-ri --no-rdoc -v4.10.9
+  $sudo rvm 2.4.3 do gem install libshadow --no-ri --no-rdoc
+  $sudo rvm 2.4.3 do gem install puppet-module --no-ri --no-rdoc
+  $sudo rvm 2.4.3 do gem install ruby-augeas --no-ri --no-rdoc
+  $sudo rvm 2.4.3 do gem install syck --no-ri --no-rdoc
 
   # install r10k
-  $sudo rvm 2.4.2 do gem install --no-rdoc --no-ri r10k
+  $sudo rvm 2.4.3 do gem install --no-rdoc --no-ri r10k
 
   if [ ! -L /etc/puppetlabs/code/modules ]; then
     rm -rf /etc/puppetlabs/code/modules;
@@ -84,26 +84,26 @@ else
   echo "CentOS/openvz 6.x detected..."; 
 
   # Update rubygems, and pull down facter and then puppet...
-  $sudo rvm 2.4.2 do gem update --system
-  $sudo rvm 2.4.2 do gem install json_pure -v1.8.3 --no-ri --no-rdoc
-  $sudo rvm 2.4.2 do gem install facter --no-ri --no-rdoc
-  $sudo rvm 2.4.2 do gem install puppet --no-ri --no-rdoc -v3.8.7
-  $sudo rvm 2.4.2 do gem install libshadow --no-ri --no-rdoc
-  $sudo rvm 2.4.2 do gem install puppet-module --no-ri --no-rdoc
-  $sudo rvm 2.4.2 do gem install ruby-augeas --no-ri --no-rdoc
-  $sudo rvm 2.4.2 do gem install syck --no-ri --no-rdoc
+  #$sudo rvm 2.4.2 do gem update --system
+  #$sudo rvm 2.4.2 do gem install json_pure -v1.8.3 --no-ri --no-rdoc
+  #$sudo rvm 2.4.2 do gem install facter --no-ri --no-rdoc
+  #$sudo rvm 2.4.2 do gem install puppet --no-ri --no-rdoc -v3.8.7
+  #$sudo rvm 2.4.2 do gem install libshadow --no-ri --no-rdoc
+  #$sudo rvm 2.4.2 do gem install puppet-module --no-ri --no-rdoc
+  #$sudo rvm 2.4.2 do gem install ruby-augeas --no-ri --no-rdoc
+  #$sudo rvm 2.4.2 do gem install syck --no-ri --no-rdoc
 
   # install r10k
-  $sudo rvm 2.4.2 do gem install --no-rdoc --no-ri r10k
+  #$sudo rvm 2.4.2 do gem install --no-rdoc --no-ri r10k
 
   #fix puppet
-  $sudo sed -e 's/  Syck.module_eval monkeypatch/  #Syck.module_eval monkeypatch/' -i /usr/local/rvm/gems/ruby-2.4.2/gems/puppet-3.8.7/lib/puppet/vendor/safe_yaml/lib/safe_yaml/syck_node_monkeypatch.rb
+  #$sudo sed -e 's/  Syck.module_eval monkeypatch/  #Syck.module_eval monkeypatch/' -i /usr/local/rvm/gems/ruby-2.4.2/gems/puppet-3.8.7/lib/puppet/vendor/safe_yaml/lib/safe_yaml/syck_node_monkeypatch.rb
 
 fi;
 
 #remove old versions
-$sudo rvm uninstall 2.4.1
-$sudo rvm uninstall 2.4.0
+#$sudo rvm uninstall 2.4.1
+#$sudo rvm uninstall 2.4.0
 
 # Create necessary Puppet directories...
 $sudo mkdir -p /etc/puppet /var/lib /var/log /var/run /etc/puppet/manifests /etc/puppet/modules /etc/puppet/hieradata
