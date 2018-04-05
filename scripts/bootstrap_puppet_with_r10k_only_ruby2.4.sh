@@ -62,7 +62,7 @@ if [[ `$sudo rpm -qa \*-release | grep -Ei "oracle|redhat|centos|openvz" | cut -
   $sudo rvm 2.4.3 do gem update --system
   $sudo rvm 2.4.3 do gem install json_pure --no-ri --no-rdoc
   $sudo rvm 2.4.3 do gem install facter --no-ri --no-rdoc
-  $sudo rvm 2.4.3 do gem install puppet --no-ri --no-rdoc -v4.10.9
+  $sudo rvm 2.4.3 do gem install puppet --no-ri --no-rdoc -v4.10.10
   $sudo rvm 2.4.3 do gem install libshadow --no-ri --no-rdoc
   $sudo rvm 2.4.3 do gem install puppet-module --no-ri --no-rdoc
   $sudo rvm 2.4.3 do gem install ruby-augeas --no-ri --no-rdoc
